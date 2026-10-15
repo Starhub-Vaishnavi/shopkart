@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "ShopKart Lab 03 - Products",
+    "description": "Product catalogue APIs. Run 1 first to create a product, the rest work in any order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "productId", "value": "PASTE_AN_ID_HERE" }
+  ],
+  "item": [
+    {
+      "name": "1. Create product (expect 201)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/products",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mechanical Keyboard\",\n  \"description\": \"RGB mechanical keyboard with blue switches.\",\n  \"price\": 2999,\n  \"category\": \"Electronics\",\n  \"image\": \"https://picsum.photos/seed/keyboard/500/400\",\n  \"stock\": 10\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "2. Create with missing field (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/products",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"No description\",\n  \"price\": 100\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "3. Create with price 0 (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/products",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Free item\",\n  \"description\": \"Should be rejected.\",\n  \"price\": 0,\n  \"category\": \"Books\",\n  \"image\": \"https://picsum.photos/seed/x/500/400\",\n  \"stock\": 5\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "4. Create with negative stock (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/products",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bad stock\",\n  \"description\": \"Should be rejected.\",\n  \"price\": 100,\n  \"category\": \"Books\",\n  \"image\": \"https://picsum.photos/seed/y/500/400\",\n  \"stock\": -3\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "5. Get all products (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/products" }
+    },
+    {
+      "name": "6. Search: ?search=keyboard (expect 200)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?search=keyboard", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "search", "value": "keyboard" }] } }
+    },
+    {
+      "name": "7. Filter: ?category=Electronics (expect 200)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?category=Electronics", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "category", "value": "Electronics" }] } }
+    },
+    {
+      "name": "8. Combined: ?search=phone&category=Electronics (expect 200)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?search=phone&category=Electronics", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "search", "value": "phone" }, { "key": "category", "value": "Electronics" }] } }
+    },
+    {
+      "name": "9. BONUS sort: ?sort=price_asc (expect 200)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?sort=price_asc", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "sort", "value": "price_asc" }] } }
+    },
+    {
+      "name": "10. BONUS sort: ?sort=price_desc (expect 200)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?sort=price_desc", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "sort", "value": "price_desc" }] } }
+    },
+    {
+      "name": "11. Get one product - paste an id into productId (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/products/{{productId}}" }
+    },
+    {
+      "name": "12. Invalid product id (expect 400)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/products/not-a-real-id" }
+    },
+    {
+      "name": "13. Product not found (expect 404)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/products/000000000000000000000000" }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 7c38d80f-6b8e-480f-8142-8e00c8831ed5
+
+localResources:
+  collections:
+    - ../ShopKart.postman_collection.json

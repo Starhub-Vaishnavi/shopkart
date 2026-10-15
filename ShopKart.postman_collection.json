@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "ShopKart Lab 01",
+    "description": "Run the requests top to bottom. Postman stores the login cookie automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:8000" }],
+  "item": [
+    {
+      "name": "1. Register (expect 201)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/register",
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\",\n  \"phone\": \"9876543210\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "2. Register same email again (expect 409)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/register",
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\",\n  \"phone\": \"9876543210\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "3. Register short password (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/register",
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test@gmail.com\",\n  \"password\": \"abc\",\n  \"phone\": \"9999999999\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "4. Login wrong password (expect 401)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"wrongpass\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "5. Login (expect 200 + cookie)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "6. My profile (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/customers/me" }
+    },
+    {
+      "name": "7. BONUS Change password (expect 200)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/change-password",
+        "body": { "mode": "raw", "raw": "{\n  \"oldPassword\": \"john123\",\n  \"newPassword\": \"john1234\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "8. BONUS Change it back (expect 200)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/change-password",
+        "body": { "mode": "raw", "raw": "{\n  \"oldPassword\": \"john1234\",\n  \"newPassword\": \"john123\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "9. Logout (expect 200)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/customers/logout" }
+    },
+    {
+      "name": "10. My profile after logout (expect 401)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/customers/me" }
+    }
+  ]
+}

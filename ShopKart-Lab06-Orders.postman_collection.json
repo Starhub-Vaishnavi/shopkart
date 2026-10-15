@@ -1,0 +1,145 @@
+{
+  "info": {
+    "name": "ShopKart Lab 06 - Checkout and Orders",
+    "description": "Order and payment APIs. Run 1 (login) FIRST so Postman stores the cookie. Requests 4 onwards need something in the cart. Razorpay test keys must be in backend/.env for requests 5 and 9 to work.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "productId", "value": "PASTE_A_PRODUCT_ID_HERE" },
+    { "key": "orderId", "value": "PASTE_AN_ORDER_ID_HERE" }
+  ],
+  "item": [
+    {
+      "name": "1. Login first (expect 200) - stores the cookie",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"lab4@test.local\",\n  \"password\": \"Test@1234\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "2. EMPTY CART test - create order with nothing in cart (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/create-payment-order",
+        "body": { "mode": "raw", "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Vaishnavi Reddy\",\n    \"phone\": \"9876543210\",\n    \"addressLine\": \"12 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560001\"\n  }\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "3. Put something in the cart (expect 201)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "4. BAD SHIPPING - 5 digit pincode (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/create-payment-order",
+        "body": { "mode": "raw", "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Vaishnavi Reddy\",\n    \"phone\": \"9876543210\",\n    \"addressLine\": \"12 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"56001\"\n  }\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "5. FAKE TOTAL - send totalAmount 1 (expect 201, server ignores it)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/create-payment-order",
+        "body": { "mode": "raw", "raw": "{\n  \"totalAmount\": 1,\n  \"items\": [{ \"price\": 1 }],\n  \"shippingAddress\": {\n    \"fullName\": \"Vaishnavi Reddy\",\n    \"phone\": \"9876543210\",\n    \"addressLine\": \"12 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560001\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+        "description": "Copy the returned orderId into the orderId variable. Note the amount in the response is the REAL total in paise, not the 1 we sent."
+      }
+    },
+    {
+      "name": "6. CART PRESERVED - cart is still full before verification (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/cart" }
+    },
+    {
+      "name": "7. FAKE SIGNATURE - verify with a made up signature (expect 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/verify-payment",
+        "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"razorpayPaymentId\": \"pay_FAKE123\",\n  \"razorpaySignature\": \"this_is_not_a_real_signature\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "8. CART STILL THERE after failed verification (expect 200, cart not empty)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/cart" }
+    },
+    {
+      "name": "9. My orders (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders" }
+    },
+    {
+      "name": "10. One order by id (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders/{{orderId}}" }
+    },
+    {
+      "name": "11. Invalid order id (expect 400)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders/not-a-real-id" }
+    },
+    {
+      "name": "12. Order that does not exist (expect 404)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders/000000000000000000000000" }
+    },
+    {
+      "name": "13. BONUS status step (expect 200 on a PAID order, 400 otherwise)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "14. BONUS illegal jump PLACED to DELIVERED (expect 400)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"DELIVERED\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "15. CROSS USER - log in as the second customer (expect 200)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"lab4b@test.local\",\n  \"password\": \"Test@1234\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "16. CROSS USER - read the other customer's order (expect 404)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders/{{orderId}}" }
+    },
+    {
+      "name": "17. AUTH TEST - log out (expect 200)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/customers/logout" }
+    },
+    {
+      "name": "18. AUTH TEST - GET /orders with no token (expect 401)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/orders" }
+    },
+    {
+      "name": "19. AUTH TEST - create payment order with no token (expect 401)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/create-payment-order",
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "20. AUTH TEST - verify payment with no token (expect 401)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/orders/verify-payment",
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+      }
+    }
+  ]
+}

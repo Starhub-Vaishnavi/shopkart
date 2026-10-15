@@ -1,0 +1,107 @@
+{
+  "info": {
+    "name": "ShopKart Lab 05 - Shopping Cart",
+    "description": "Cart APIs. Run 1 (login) FIRST so Postman stores the cookie, then paste a product id into productId. The lab's own test plan is requests 2-8.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "productId", "value": "PASTE_A_PRODUCT_ID_HERE" },
+    { "key": "outOfStockId", "value": "PASTE_THE_RUNNING_SHOES_ID" }
+  ],
+  "item": [
+    {
+      "name": "1. Login first (expect 200) - stores the cookie",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"lab4@test.local\",\n  \"password\": \"Test@1234\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "2. Add NEW item - quantity becomes 1 (expect 201)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "3. Re-add SAME item - quantity becomes 2, still ONE row (expect 201)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "4. Get cart - products populated (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/cart" }
+    },
+    {
+      "name": "5. Update quantity to 4 (expect 200)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/cart/{{productId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"quantity\": 4\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "6. Quantity 0 - below the minimum (expect 400)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/cart/{{productId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"quantity\": 0\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "7. Quantity 999 - exceeds stock (expect 400)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/cart/{{productId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"quantity\": 999\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "8. Add an out-of-stock product (expect 400)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/{{outOfStockId}}" }
+    },
+    {
+      "name": "9. Add a product that does not exist (expect 404)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/000000000000000000000000" }
+    },
+    {
+      "name": "10. Add a malformed id (expect 400)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/not-a-real-id" }
+    },
+    {
+      "name": "11. Remove item - returns the updated cart (expect 200)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "12. Remove it again - not in cart (expect 404)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "13. AUTH TEST - log out first (expect 200)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/customers/logout" }
+    },
+    {
+      "name": "14. AUTH TEST - GET cart with no token (expect 401)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/cart" }
+    },
+    {
+      "name": "15. AUTH TEST - POST cart with no token (expect 401)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    },
+    {
+      "name": "16. AUTH TEST - PATCH cart with no token (expect 401)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/cart/{{productId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"quantity\": 2\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "17. AUTH TEST - DELETE cart with no token (expect 401)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/cart/{{productId}}" }
+    }
+  ]
+}

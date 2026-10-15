@@ -1,0 +1,82 @@
+{
+  "info": {
+    "name": "ShopKart Lab 04 - Wishlist",
+    "description": "Wishlist APIs. Run 1 (login) FIRST so Postman stores the cookie, then paste a product id into the productId variable. Requests 2 onwards need that cookie.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "productId", "value": "PASTE_A_PRODUCT_ID_HERE" }
+  ],
+  "item": [
+    {
+      "name": "1. Login first (expect 200) - stores the cookie",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/customers/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"lab4@test.local\",\n  \"password\": \"Test@1234\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "2. Add to wishlist (expect 201)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    },
+    {
+      "name": "3. Add the SAME one again - duplicate (expect 409)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    },
+    {
+      "name": "4. Get wishlist - populated (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/wishlist" }
+    },
+    {
+      "name": "5. Add a malformed id (expect 400)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/wishlist/not-a-real-id" }
+    },
+    {
+      "name": "6. Add a product that does not exist (expect 404)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/wishlist/000000000000000000000000" }
+    },
+    {
+      "name": "7. BONUS count for the navbar badge (expect 200)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/wishlist/count" }
+    },
+    {
+      "name": "8. BONUS toggle - removes it since it is saved (expect 200)",
+      "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}/toggle" }
+    },
+    {
+      "name": "9. BONUS toggle again - adds it back (expect 200)",
+      "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}/toggle" }
+    },
+    {
+      "name": "10. Remove from wishlist (expect 200)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    },
+    {
+      "name": "11. Remove it again - not in wishlist (expect 404)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    },
+    {
+      "name": "12. Remove a malformed id (expect 400)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/wishlist/not-a-real-id" }
+    },
+    {
+      "name": "13. AUTH TEST - log out first (expect 200)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/customers/logout" }
+    },
+    {
+      "name": "14. AUTH TEST - GET wishlist with no token (expect 401)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/wishlist" }
+    },
+    {
+      "name": "15. AUTH TEST - POST wishlist with no token (expect 401)",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    },
+    {
+      "name": "16. AUTH TEST - DELETE wishlist with no token (expect 401)",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/wishlist/{{productId}}" }
+    }
+  ]
+}
