@@ -1,38 +1,88 @@
-# ShopKart — Engineering Labs 01 & 02
+# ShopKart
 
-| Lab | What it is | Folder |
-|-----|-----------|--------|
-| Lab 01 | Backend — Customer Authentication APIs | `backend/` |
-| Lab 02 | Frontend — Register / Login / Home UI | `frontend/` |
+A MERN practice shop built across six engineering labs: customer
+authentication, a product catalogue, a wishlist, a cart, and a Razorpay
+test-mode checkout that turns the cart into a permanent order.
 
-Lab 02 is the React UI that talks to the Lab 01 APIs. Same project, two halves.
+| Lab | What it adds | Where |
+|-----|--------------|-------|
+| 01 | Customer auth APIs — bcrypt, JWT in an HttpOnly cookie | `backend/` |
+| 02 | React UI — register, login, home | `frontend/` |
+| 03 | Product catalogue — search, category filter, sorting | both |
+| 04 | Wishlist — ObjectId references and `populate()` | both |
+| 05 | Shopping cart — shared React context | both |
+| 06 | Checkout and orders — Razorpay test mode | both |
+
+**Stack:** React (Vite) · Node + Express · MongoDB (Mongoose) · JWT · Razorpay
 
 ---
 
-## How to run (3 terminals)
+## Setup
 
-**Terminal 1 — database**
+**You need:** Node 18 or newer, and MongoDB. If you do not have MongoDB
+installed, `./start-db.sh` downloads a local copy into `.mongodb/` and runs
+it — no system-wide install, nothing to uninstall afterwards.
+
+**1. Clone and install**
+
 ```bash
+git clone https://github.com/Starhub-Vaishnavi/shopkart.git
+cd shopkart
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+**2. Create the backend environment file**
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Then open `.env` and fill it in:
+
+| Variable | What to put |
+|----------|-------------|
+| `PORT` | `8000` |
+| `MONGO_URI` | `mongodb://127.0.0.1:27017/shopkart` for the local database |
+| `JWT_SECRET` | any long random string |
+| `RAZORPAY_KEY_ID` | test key id from dashboard.razorpay.com → Settings → API Keys |
+| `RAZORPAY_KEY_SECRET` | the matching test secret |
+
+Everything except checkout works without the Razorpay keys — the payment
+routes answer with a clear "payments are not configured" message instead.
+
+**3. Run it — three terminals**
+
+```bash
+# terminal 1 — database
 ./start-db.sh
-```
 
-**Terminal 2 — backend** (http://localhost:8000)
-```bash
+# terminal 2 — backend, on http://localhost:8000
 cd backend && npm run dev
-```
 
-**Terminal 3 — frontend** (http://localhost:5173)
-```bash
+# terminal 3 — frontend, on http://localhost:5173
 cd frontend && npm run dev
 ```
 
-Then open http://localhost:5173
+Open **http://localhost:5173**, register an account, and start from there.
+
+**4. Add some products**
+
+The catalogue starts empty. Import `ShopKart-Lab03-Products.postman_collection.json`
+into Postman and run the create-product request a few times, or send:
+
+```bash
+curl -X POST http://localhost:8000/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Mechanical Keyboard","description":"RGB mechanical keyboard.","price":2999,"category":"Electronics","image":"https://picsum.photos/seed/keyboard/500/400","stock":10}'
+```
+
+**Paying in test mode:** card `4111 1111 1111 1111`, any future expiry, any
+CVV. No real money moves.
 
 > **Why port 8000 and not 5000?** On macOS, port 5000 is taken by the
 > AirPlay Receiver, which answers every request with `403 Forbidden`.
-> To use 5000 anyway: System Settings → General → AirDrop & Handoff →
-> turn off AirPlay Receiver, then change `PORT` in `backend/.env`
-> and `baseURL` in `frontend/src/services/api.js`.
 
 ---
 
