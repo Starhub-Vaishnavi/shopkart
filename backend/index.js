@@ -21,8 +21,13 @@ app.use(cookieParser());   // parses the Cookie header into req.cookies
 app.use(
   cors({
     // Vite normally uses 5173, but if that port is already busy it quietly
-    // moves to 5174. We allow both so the app works either way.
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    // moves to 5174. We allow both so the app works either way locally.
+    // CLIENT_URL is the deployed frontend, set as an env var on the host.
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+    ],
     credentials: true, // without this the browser drops our cookie
   })
 );

@@ -1,0 +1,23 @@
+# Render reads this file when you connect the repo.
+# The frontend is deployed separately on Vercel.
+services:
+  - type: web
+    name: shopkart-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The rest are secrets - set them in the Render dashboard, never here.
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false

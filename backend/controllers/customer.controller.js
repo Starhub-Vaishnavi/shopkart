@@ -3,10 +3,18 @@ const Customer = require("../models/customer.model");
 const generateToken = require("../utils/generateToken");
 
 // Settings used every time we set or clear the auth cookie.
+// Deployed, the frontend and the backend sit on two different domains
+// (something.vercel.app and something.onrender.com). A "lax" cookie is NOT
+// sent on those cross-site requests, so login would appear to work and then
+// every protected route would answer 401. "none" allows it - and browsers
+// only accept sameSite none together with secure, which needs HTTPS.
+// Locally there is no HTTPS, so we keep lax there.
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
-  httpOnly: true,   // browser JavaScript CANNOT read this cookie -> protects against XSS
-  secure: false,    // set to true only when the site runs on HTTPS
-  sameSite: "lax",  // don't send this cookie on cross-site requests -> protects against CSRF
+  httpOnly: true,                          // JavaScript cannot read it -> protects against XSS
+  secure: isProduction,                    // HTTPS only, which hosts provide
+  sameSite: isProduction ? "none" : "lax", // cross-site when deployed, lax locally
 };
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000; // in milliseconds

@@ -207,3 +207,65 @@ confirmation screen). Postman collection:
 total always recomputed from database prices, item name/price snapshotted
 onto the order, cart cleared only after a verified signature, and another
 customer's order answers 404.
+
+---
+
+## Deploying
+
+Three free services. The code is already prepared for all of them.
+
+| Part | Host | Root directory |
+|------|------|----------------|
+| Database | MongoDB Atlas (free M0) | — |
+| Backend | Render | `backend` |
+| Frontend | Vercel | `frontend` |
+
+**1. Database — MongoDB Atlas**
+
+Create a free M0 cluster, add a database user, and under Network Access allow
+`0.0.0.0/0` (Render's IPs are not fixed). Copy the connection string; it looks
+like `mongodb+srv://user:pass@cluster.mongodb.net/shopkart`.
+
+**2. Backend — Render**
+
+New Web Service → connect this repo → root directory `backend`. Render reads
+`render.yaml`, so you only have to fill in the environment variables:
+
+```
+NODE_ENV=production
+MONGO_URI=<the Atlas string>
+JWT_SECRET=<a long random string>
+RAZORPAY_KEY_ID=<your test key id>
+RAZORPAY_KEY_SECRET=<your test key secret>
+CLIENT_URL=<the Vercel URL, added after step 3>
+```
+
+**3. Frontend — Vercel**
+
+Import this repo → root directory `frontend`. Add one environment variable:
+
+```
+VITE_API_URL=https://<your-render-service>.onrender.com
+```
+
+Vite bakes this in at **build** time, so set it before deploying — and
+redeploy if you ever change it.
+
+**4. Join them up**
+
+Put the Vercel URL into `CLIENT_URL` on Render and redeploy the backend,
+otherwise CORS will block the browser.
+
+### Why the cookie needs care when deployed
+
+Locally both halves are on `localhost`, so a `sameSite: "lax"` cookie works.
+Deployed they are on two different domains, and a lax cookie is **not** sent
+across sites — login would appear to succeed and then every protected route
+would answer 401. In production the cookie is therefore `sameSite: "none"`
+with `secure: true`, which browsers only accept over HTTPS. Both hosts
+provide HTTPS, so this works.
+
+### Note on the free tier
+
+A free Render service sleeps after inactivity, so the first request after a
+quiet period takes around 50 seconds. That is the host, not the code.
